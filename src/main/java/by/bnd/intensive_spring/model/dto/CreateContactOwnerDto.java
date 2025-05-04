@@ -28,6 +28,10 @@ public class CreateContactOwnerDto {
     @NotEmpty(message = "Email не может быть пустым")
     private String email;
 
+//    @Size(min = 2, max = 50, message = "Полное имя должно быть от 6 до 20 символов")
+//    @NotEmpty(message = "Полное имя пользователя не может быть пустым")
+//    private String fullName;
+
     @NotBlank(message = "Поле password не может быть пустым")
     // ^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[a-zA-Z0-9]{8,}$
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[a-zA-Z0-9]{8,}$",
