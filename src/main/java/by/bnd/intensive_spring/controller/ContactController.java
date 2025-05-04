@@ -3,6 +3,7 @@ package by.bnd.intensive_spring.controller;
 import by.bnd.intensive_spring.common.util.ServerResponseHelper;
 import by.bnd.intensive_spring.model.ServerResponse;
 import by.bnd.intensive_spring.model.dto.CreateContactDto;
+import by.bnd.intensive_spring.model.dto.UpdateContactDto;
 import by.bnd.intensive_spring.model.entity.Contact;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -21,7 +22,7 @@ public class ContactController {
     @Autowired
     private ModelMapper modelMapper;
 
-    private ArrayList<Contact> contacts = new ArrayList<>();
+    private final ArrayList<Contact> contacts = new ArrayList<>();
 
     public ContactController() {
         Random random = new Random();
@@ -79,10 +80,6 @@ public class ContactController {
         }
         Contact contact = modelMapper.map(createContactDto, Contact.class);
         contact.setId(newId);
-//        contact.setEmail(createContactDto.getEmail());
-//        contact.setFirstName(createContactDto.getFirstName());
-//        contact.setLastName(createContactDto.getLastName());
-//        contact.setTelephone(createContactDto.getTelephone());
 
         contacts.add(contact);
 
@@ -91,16 +88,45 @@ public class ContactController {
 
     @PutMapping("/update")
     public ResponseEntity<ServerResponse<Contact>> updateContact(
-            @RequestBody Contact contact) {
+            @Valid @RequestBody UpdateContactDto updateContactDto) {
 
-        return contacts.stream()
-                .filter(c -> c.getId() == contact.getId())
+        // Ищем контакт для обновления по ID
+        Contact existingContact = contacts.stream()
+                .filter(c -> c.getId() == updateContactDto.getId())
                 .findFirst()
-                .map(existingContact -> {
-                    int indexOfExistingContact = contacts.indexOf(existingContact);
-                    contacts.set(indexOfExistingContact, contact);
-                    return ServerResponseHelper.ok(contact);
-                }).orElse(ServerResponseHelper.notFound(null,
-                        Collections.singletonList("Контакт для обновления с указанным id не найден")));
+                .orElse(null);
+
+        // Если контакт с таким ID не нашли, выдаем response notFound и ошибку
+        if (existingContact == null) {
+            return ServerResponseHelper.notFound(null,
+                    Collections.singletonList("Update: Контакт с указанным ID не найден"));
+        }
+        // Проверяем, есть ли контакт с таким email уже существует, выдаем response conflict и ошибку
+        boolean emailExist = contacts.stream()
+                .filter(c -> c.getId() != updateContactDto.getId())
+                .anyMatch(c -> c.getEmail().equalsIgnoreCase(updateContactDto.getEmail()));
+        if (emailExist) {
+            return  ServerResponseHelper.conflict(null,
+                    Collections.singletonList("Update: Контакт с указанным email уже существует"));
+        }
+        // Проверяем, есть ли контакт с таким телефоном уже существует, выдаем response conflict и ошибку
+        boolean phoneExist = contacts.stream()
+                .filter(c -> c.getId() != updateContactDto.getId())
+                .anyMatch(c -> c.getTelephone().equals(updateContactDto.getTelephone()));
+        if (phoneExist) {
+            return  ServerResponseHelper.conflict(null,
+                    Collections.singletonList("Update: Контакт с указанным телефоном уже существует"));
+        }
+
+        // Маппим updateContactDto в Contact с помощью библиотеки modelMapper
+        Contact updatedContact = modelMapper.map(updateContactDto, Contact.class);
+
+        // Запоминаем индекс обновляемого контакта
+        int index = contacts.indexOf(existingContact);
+
+        // Обновляем контакт новым контактом updateContact
+        contacts.set(index, updatedContact);
+
+        return ServerResponseHelper.ok(updatedContact);
     }
 }
