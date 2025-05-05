@@ -10,12 +10,12 @@ public interface ContactService {
 
     List<Contact> getAllContacts();
 
-    Contact getContactById(Long id);
+    Contact getContactById(int id);
 
     Contact createContact(CreateContactDto createContactDto);
 
-    Contact updateContact(Long id, UpdateContactDto updateContactDto);
+    Contact updateContact(UpdateContactDto updateContactDto);
 
-    void deleteContact(Long id);
+    boolean deleteContact(int id);
 
 }

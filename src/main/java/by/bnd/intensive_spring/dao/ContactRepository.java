@@ -9,11 +9,11 @@ public interface ContactRepository {
 
     List<Contact> findAll();
 
-    Optional<Contact> findById(Long id);
+    Optional<Contact> findById(int id);
 
     Contact save(Contact contact);
 
-    boolean deleteById(Long id);
+    boolean deleteById(int id);
 
     Optional<Contact> findByEmail(String email);
 

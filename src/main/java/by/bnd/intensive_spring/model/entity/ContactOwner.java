@@ -23,10 +23,7 @@ public class ContactOwner {
 
     private List<Contact> contacts = new ArrayList<>();
 
-    public ContactOwner() {
-        this.id = UUID.randomUUID().toString();
-        this.role = AppRole.USER;
-    }
+    public ContactOwner() {}
 
     public ContactOwner(String username, String description) {
         this();
